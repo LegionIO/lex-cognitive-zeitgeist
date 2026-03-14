@@ -32,7 +32,7 @@ RSpec.describe Legion::Extensions::CognitiveZeitgeist::Helpers::ZeitgeistEngine 
 
     it 'returns themes sorted by weight descending' do
       3.times { ingest(domain: :threat, intensity: 0.9) }
-      1.times { ingest(domain: :curiosity, intensity: 0.1) }
+      ingest(domain: :curiosity, intensity: 0.1)
       themes = engine.dominant_themes
       expect(themes.first[:domain]).to eq(:threat)
     end

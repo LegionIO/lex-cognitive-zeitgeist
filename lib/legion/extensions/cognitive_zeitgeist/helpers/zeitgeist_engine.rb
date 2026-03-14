@@ -54,17 +54,7 @@ module Legion
             subsystems = @signals.map(&:source_subsystem).uniq
             return 1.0 if subsystems.size <= 1
 
-            subsystem_domains = subsystems.to_h do |sub|
-              subs_signals = @signals.select { |s| s.source_subsystem == sub }
-              dominant = compute_dominant_domain(subs_signals)
-              [sub, dominant]
-            end
-
-            overall_dominant = dominant_themes(limit: 1).first&.fetch(:domain)
-            return 0.5 unless overall_dominant
-
-            aligned = subsystem_domains.count { |_sub, dom| dom == overall_dominant }
-            (aligned.to_f / subsystems.size).round(10)
+            compute_alignment(subsystems)
           end
 
           def rising_domains(window_size: WINDOW_SIZE / 2)
@@ -113,6 +103,19 @@ module Legion
           end
 
           private
+
+          def compute_alignment(subsystems)
+            subsystem_domains = subsystems.to_h do |sub|
+              subs_signals = @signals.select { |s| s.source_subsystem == sub }
+              [sub, compute_dominant_domain(subs_signals)]
+            end
+
+            overall_dominant = dominant_themes(limit: 1).first&.fetch(:domain)
+            return 0.5 unless overall_dominant
+
+            aligned = subsystem_domains.count { |_sub, dom| dom == overall_dominant }
+            (aligned.to_f / subsystems.size).round(10)
+          end
 
           def compute_dominant_domain(subs_signals)
             return nil if subs_signals.empty?
